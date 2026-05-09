@@ -28,4 +28,4 @@ ArcSearch uses an independent search index — not a feed curated by an ad platf
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+AGPL — see [LICENSE](LICENSE).
