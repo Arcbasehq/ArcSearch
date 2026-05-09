@@ -1,0 +1,49 @@
+<script lang="ts">
+	import type { NewsResult } from '$lib/search';
+	import { settingsStore } from '$lib/stores/settings';
+
+	let { result } = $props<{ result: NewsResult }>();
+
+	let openInNewTab = $derived(
+		$settingsStore.find((s) => s.id === 'open-new-tab')?.checked ?? true
+	);
+</script>
+
+<article class="group rounded-2xl px-1 py-1 transition hover:bg-white/5">
+	<a
+		href={result.url}
+		target={openInNewTab ? '_blank' : '_self'}
+		rel="noreferrer noopener"
+		class="flex gap-4 rounded-2xl px-3 py-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50"
+	>
+		{#if result.thumbnail}
+			<img
+				src={result.thumbnail}
+				alt=""
+				class="h-[72px] w-28 shrink-0 rounded-xl object-cover"
+				onerror={(e) => {
+					(e.currentTarget as HTMLImageElement).style.display = 'none';
+				}}
+			/>
+		{/if}
+		<div class="min-w-0 space-y-1">
+			<div class="flex items-center gap-1.5 text-xs text-[var(--app-muted)]">
+				{#if result.siteName}
+					<span class="font-medium">{result.siteName}</span>
+				{/if}
+				{#if result.siteName && result.age}
+					<span>·</span>
+				{/if}
+				{#if result.age}
+					<span>{result.age}</span>
+				{/if}
+			</div>
+			<h2 class="font-medium leading-snug text-[var(--app-accent)] group-hover:underline line-clamp-2">
+				{result.title}
+			</h2>
+			{#if result.snippet}
+				<p class="text-sm leading-5 text-[var(--app-muted)] line-clamp-2">{result.snippet}</p>
+			{/if}
+		</div>
+	</a>
+</article>

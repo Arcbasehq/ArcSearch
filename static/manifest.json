@@ -1,0 +1,20 @@
+{
+  "name": "ArcSearch",
+  "short_name": "ArcSearch",
+  "description": "Search the web privately. No tracking, no profiles, no ads.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#111111",
+  "background_color": "#111111",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["search", "utilities"],
+  "lang": "en"
+}

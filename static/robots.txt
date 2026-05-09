@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /$
+Allow: /about$
+Disallow: /search
+Disallow: /api
+Disallow: /settings
+Disallow: /themes
+
+Sitemap: https://search.arcbase.one/sitemap.xml

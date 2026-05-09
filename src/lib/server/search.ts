@@ -1,0 +1,475 @@
+import { env } from '$env/dynamic/private';
+
+import {
+	SEARCH_QUERY_ERROR,
+	normalizeSearchQuery,
+	type SearchResponse,
+	type SearchResult,
+	type NewsResult,
+	type VideoResult,
+	type ImageResult,
+	type Infobox,
+	type SearchTab
+} from '$lib/search';
+
+const RATE_LIMIT_BUCKET_CAPACITY = 4;
+const RATE_LIMIT_REFILL_INTERVAL_MS = 10_000;
+const RATE_LIMIT_STATE_TTL_MS = 5 * 60_000;
+const REQUEST_TIMEOUT_MS = 8_000;
+
+const BRAVE_ENDPOINTS: Record<SearchTab, string> = {
+	web: 'https://api.search.brave.com/res/v1/web/search',
+	news: 'https://api.search.brave.com/res/v1/news/search',
+	videos: 'https://api.search.brave.com/res/v1/videos/search',
+	images: 'https://api.search.brave.com/res/v1/images/search'
+};
+
+type RateLimitState = {
+	tokens: number;
+	lastRefillAt: number;
+	updatedAt: number;
+};
+
+const rateLimitBuckets = new Map<string, RateLimitState>();
+
+const HTML_ENTITY_MAP: Record<string, string> = {
+	amp: '&',
+	apos: "'",
+	gt: '>',
+	lt: '<',
+	nbsp: ' ',
+	quot: '"'
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null;
+}
+
+function readText(value: unknown): string {
+	return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim() : '';
+}
+
+function decodeHtmlEntities(value: string): string {
+	return value.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_match, entity: string) => {
+		if (entity.startsWith('#x') || entity.startsWith('#X')) {
+			const codePoint = Number.parseInt(entity.slice(2), 16);
+			return Number.isNaN(codePoint) ? _match : String.fromCodePoint(codePoint);
+		}
+		if (entity.startsWith('#')) {
+			const codePoint = Number.parseInt(entity.slice(1), 10);
+			return Number.isNaN(codePoint) ? _match : String.fromCodePoint(codePoint);
+		}
+		return HTML_ENTITY_MAP[entity.toLowerCase()] ?? _match;
+	});
+}
+
+function stripHtml(value: string): string {
+	return decodeHtmlEntities(
+		value
+			.replace(/<[^>]*>/g, ' ')
+			.replace(/\s+/g, ' ')
+			.trim()
+	);
+}
+
+function normalizeUrl(value: unknown): string | null {
+	const candidate = decodeHtmlEntities(readText(value));
+	if (!candidate) return null;
+	try {
+		const url = new URL(candidate);
+		if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+		return url.toString();
+	} catch {
+		return null;
+	}
+}
+
+function getThumbnail(raw: Record<string, unknown>): string | undefined {
+	return isRecord(raw.thumbnail) && typeof raw.thumbnail.src === 'string'
+		? raw.thumbnail.src
+		: undefined;
+}
+
+function getHostname(raw: Record<string, unknown>): string | undefined {
+	return isRecord(raw.meta_url) && typeof raw.meta_url.hostname === 'string'
+		? raw.meta_url.hostname || undefined
+		: undefined;
+}
+
+function normalizeWebResult(raw: unknown): SearchResult | null {
+	if (!isRecord(raw)) return null;
+	const title = readText(raw.title);
+	const url = normalizeUrl(raw.url);
+	if (!title || !url) return null;
+
+	const sitelinks: NonNullable<SearchResult['sitelinks']> = [];
+	if (isRecord(raw.deep_results) && Array.isArray(raw.deep_results.buttons)) {
+		for (const btn of raw.deep_results.buttons) {
+			if (!isRecord(btn)) continue;
+			const slTitle = readText(btn.title);
+			const slUrl = normalizeUrl(btn.url);
+			if (slTitle && slUrl) sitelinks.push({ title: slTitle, url: slUrl });
+		}
+	}
+
+	return {
+		title: stripHtml(title),
+		url,
+		snippet: stripHtml(readText(raw.description ?? raw.snippet ?? '')),
+		siteName: isRecord(raw.profile) ? readText(raw.profile.name) || undefined : undefined,
+		age: typeof raw.age === 'string' ? raw.age : undefined,
+		thumbnail: getThumbnail(raw),
+		sitelinks: sitelinks.length > 0 ? sitelinks : undefined
+	};
+}
+
+function normalizeNewsResult(raw: unknown): NewsResult | null {
+	if (!isRecord(raw)) return null;
+	const title = readText(raw.title);
+	const url = normalizeUrl(raw.url);
+	if (!title || !url) return null;
+
+	return {
+		title: stripHtml(title),
+		url,
+		snippet: stripHtml(readText(raw.description ?? '')),
+		siteName: getHostname(raw),
+		age: typeof raw.age === 'string' ? raw.age : undefined,
+		thumbnail: getThumbnail(raw)
+	};
+}
+
+function normalizeVideoResult(raw: unknown): VideoResult | null {
+	if (!isRecord(raw)) return null;
+	const title = readText(raw.title);
+	const url = normalizeUrl(raw.url);
+	if (!title || !url) return null;
+
+	const videoMeta = isRecord(raw.video) ? raw.video : null;
+
+	return {
+		title: stripHtml(title),
+		url,
+		description: stripHtml(readText(raw.description ?? '')),
+		thumbnail: getThumbnail(raw),
+		age: typeof raw.age === 'string' ? raw.age : undefined,
+		duration: videoMeta && typeof videoMeta.duration === 'string' ? videoMeta.duration : undefined,
+		views: videoMeta && typeof videoMeta.views === 'string' ? videoMeta.views : undefined,
+		publisher: getHostname(raw)
+	};
+}
+
+function normalizeImageResult(raw: unknown): ImageResult | null {
+	if (!isRecord(raw)) return null;
+	const title = readText(raw.title);
+	const pageUrl = normalizeUrl(raw.url);
+	if (!title || !pageUrl) return null;
+
+	const imageUrl = isRecord(raw.properties) ? normalizeUrl(raw.properties.url) : null;
+	const thumbnail =
+		isRecord(raw.thumbnail) && typeof raw.thumbnail.src === 'string' ? raw.thumbnail.src : null;
+
+	if (!imageUrl && !thumbnail) return null;
+
+	return {
+		title: stripHtml(title),
+		url: pageUrl,
+		imageUrl: imageUrl ?? thumbnail ?? '',
+		thumbnail: thumbnail ?? imageUrl ?? '',
+		source: getHostname(raw),
+		width:
+			isRecord(raw.properties) && typeof raw.properties.width === 'number'
+				? raw.properties.width
+				: undefined,
+		height:
+			isRecord(raw.properties) && typeof raw.properties.height === 'number'
+				? raw.properties.height
+				: undefined
+	};
+}
+
+function normalizeInfobox(raw: unknown): Infobox | null {
+	if (!isRecord(raw)) return null;
+	const title = readText(raw.title);
+	if (!title) return null;
+
+	let attributes: Array<[string, string]> | undefined;
+	if (Array.isArray(raw.attributes)) {
+		const parsed = (raw.attributes as unknown[])
+			.filter((a): a is unknown[] => Array.isArray(a) && a.length >= 2)
+			.map(([k, v]) => [readText(k), readText(v)] as [string, string])
+			.filter(([k, v]) => k && v);
+		if (parsed.length > 0) attributes = parsed;
+	}
+
+	let profiles: Infobox['profiles'];
+	if (Array.isArray(raw.profiles)) {
+		const parsed = (raw.profiles as unknown[])
+			.filter(isRecord)
+			.map((p) => ({
+				network: readText(p.name ?? p.network ?? ''),
+				url: normalizeUrl(p.url) ?? '',
+				imageUrl: isRecord(p.img) && typeof p.img.src === 'string' ? p.img.src : undefined
+			}))
+			.filter((p) => p.network && p.url);
+		if (parsed.length > 0) profiles = parsed;
+	}
+
+	return {
+		title: stripHtml(title),
+		description:
+			typeof raw.description === 'string'
+				? stripHtml(readText(raw.description)) || undefined
+				: undefined,
+		url: typeof raw.url === 'string' ? normalizeUrl(raw.url) ?? undefined : undefined,
+		imageUrl: isRecord(raw.img) && typeof raw.img.src === 'string' ? raw.img.src : undefined,
+		attributes,
+		profiles
+	};
+}
+
+function pruneRateLimitBuckets(now: number): void {
+	for (const [identifier, bucket] of rateLimitBuckets) {
+		if (now - bucket.updatedAt > RATE_LIMIT_STATE_TTL_MS) {
+			rateLimitBuckets.delete(identifier);
+		}
+	}
+}
+
+export function consumeRateLimit(identifier: string): {
+	allowed: boolean;
+	retryAfterSeconds: number;
+} {
+	const now = Date.now();
+	pruneRateLimitBuckets(now);
+
+	const existing = rateLimitBuckets.get(identifier) ?? {
+		tokens: RATE_LIMIT_BUCKET_CAPACITY,
+		lastRefillAt: now,
+		updatedAt: now
+	};
+
+	const elapsed = now - existing.lastRefillAt;
+	const refillTokens = Math.floor(elapsed / RATE_LIMIT_REFILL_INTERVAL_MS);
+
+	if (refillTokens > 0) {
+		existing.tokens = Math.min(RATE_LIMIT_BUCKET_CAPACITY, existing.tokens + refillTokens);
+		existing.lastRefillAt += refillTokens * RATE_LIMIT_REFILL_INTERVAL_MS;
+	}
+
+	existing.updatedAt = now;
+
+	if (existing.tokens <= 0) {
+		rateLimitBuckets.set(identifier, existing);
+		const retryAfterSeconds = Math.max(
+			1,
+			Math.ceil((RATE_LIMIT_REFILL_INTERVAL_MS - (now - existing.lastRefillAt)) / 1000)
+		);
+		return { allowed: false, retryAfterSeconds };
+	}
+
+	existing.tokens -= 1;
+	rateLimitBuckets.set(identifier, existing);
+	return { allowed: true, retryAfterSeconds: 0 };
+}
+
+const AD_DOMAINS = new Set([
+	'doubleclick.net', 'googlesyndication.com', 'googleadservices.com',
+	'amazon-adsystem.com', 'advertising.com', 'adnxs.com', 'adsrvr.org',
+	'outbrain.com', 'taboola.com', 'revcontent.com', 'media.net',
+	'criteo.com', 'rubiconproject.com', 'pubmatic.com', 'openx.net',
+	'casalemedia.com', 'moatads.com', 'adroll.com', 'sharethrough.com',
+	'contextweb.com', 'lijit.com', 'yieldmo.com', 'triplelift.com'
+]);
+
+const TRACKER_DOMAINS = new Set([
+	'google-analytics.com', 'analytics.google.com', 'hotjar.com',
+	'mixpanel.com', 'segment.com', 'heap.io', 'fullstory.com',
+	'clarity.ms', 'scorecardresearch.com', 'quantserve.com',
+	'chartbeat.com', 'mouseflow.com', 'crazyegg.com', 'kissmetrics.com',
+	'optimizely.com', 'newrelic.com', 'datadog-browser-agent.com',
+	'marketo.com', 'pardot.com', 'hubspot.com', 'intercom.io'
+]);
+
+function isBlockedDomain(url: string, blocklist: Set<string>): boolean {
+	try {
+		const hostname = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+		return [...blocklist].some((d) => hostname === d || hostname.endsWith('.' + d));
+	} catch {
+		return false;
+	}
+}
+
+const VALID_COUNTRIES = new Set([
+	'US','GB','CA','AU','DE','FR','JP','IN','BR'
+]);
+
+function getBraveSearchUrl(
+	query: string,
+	tab: SearchTab,
+	safesearch: 'strict' | 'moderate' | 'off',
+	offset: number,
+	freshness?: string,
+	country?: string
+): URL {
+	const searchUrl = new URL(BRAVE_ENDPOINTS[tab]);
+	searchUrl.searchParams.set('q', query);
+	searchUrl.searchParams.set('count', '10');
+	if (tab !== 'images') searchUrl.searchParams.set('safesearch', safesearch);
+	if (tab === 'web') {
+		searchUrl.searchParams.set('search_lang', 'en');
+		const resolvedCountry = country && VALID_COUNTRIES.has(country.toUpperCase()) ? country.toUpperCase() : 'us';
+		searchUrl.searchParams.set('country', resolvedCountry);
+	}
+	if (offset > 0) searchUrl.searchParams.set('offset', String(offset));
+	if (freshness) searchUrl.searchParams.set('freshness', freshness);
+	return searchUrl;
+}
+
+function getBraveApiKey(): string {
+	const apiKey = env.BRAVE_SEARCH_API_KEY?.trim();
+	if (!apiKey) throw new Error('BRAVE_SEARCH_API_KEY is not configured');
+	return apiKey;
+}
+
+async function fetchBraveSearch(
+	query: string,
+	tab: SearchTab,
+	safesearch: 'strict' | 'moderate' | 'off',
+	offset: number,
+	freshness: string | undefined,
+	fetchImpl: typeof fetch,
+	country?: string,
+	filterAds?: boolean,
+	blockAds?: boolean,
+	blockTrackers?: boolean
+): Promise<SearchResponse> {
+	const searchUrl = getBraveSearchUrl(query, tab, safesearch, offset, freshness, country);
+	const apiKey = getBraveApiKey();
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+	try {
+		const response = await fetchImpl(searchUrl, {
+			cache: 'no-store',
+			credentials: 'omit',
+			headers: {
+				accept: 'application/json',
+				'X-Subscription-Token': apiKey,
+				'user-agent':
+					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 ArcSearch/1.0'
+			},
+			signal: controller.signal
+		});
+
+		if (!response.ok) throw new Error(`Brave Search responded with ${response.status}`);
+
+		const payload: unknown = await response.json();
+		const queryValue =
+			isRecord(payload) && isRecord(payload.query)
+				? readText(payload.query.original ?? payload.query.alt ?? payload.query.q)
+				: '';
+
+		if (tab === 'web') {
+			const rawWeb =
+				isRecord(payload) && isRecord(payload.web) && Array.isArray(payload.web.results)
+					? payload.web.results
+					: [];
+			const results = rawWeb
+				.filter((r) => !filterAds || !isRecord(r) || r['type'] !== 'ad')
+				.filter((r) => !blockAds || !isRecord(r) || !isBlockedDomain(String(r.url ?? ''), AD_DOMAINS))
+				.filter((r) => !blockTrackers || !isRecord(r) || !isBlockedDomain(String(r.url ?? ''), TRACKER_DOMAINS))
+				.map(normalizeWebResult)
+				.filter((r): r is SearchResult => r !== null)
+				.slice(0, 10);
+
+			const rawNews =
+				isRecord(payload) && isRecord(payload.news) && Array.isArray(payload.news.results)
+					? payload.news.results
+					: [];
+			const newsResults = rawNews
+				.map(normalizeNewsResult)
+				.filter((r): r is NewsResult => r !== null)
+				.slice(0, 4);
+
+			const rawVideos =
+				isRecord(payload) && isRecord(payload.videos) && Array.isArray(payload.videos.results)
+					? payload.videos.results
+					: [];
+			const videoResults = rawVideos
+				.map(normalizeVideoResult)
+				.filter((r): r is VideoResult => r !== null)
+				.slice(0, 3);
+
+			const infobox = isRecord(payload) ? normalizeInfobox(payload.infobox) ?? undefined : undefined;
+
+			return {
+				query: queryValue || query,
+				tab: 'web',
+				results,
+				newsResults: newsResults.length > 0 ? newsResults : undefined,
+				videoResults: videoResults.length > 0 ? videoResults : undefined,
+				infobox
+			};
+		}
+
+		// news / videos / images: top-level results array
+		const rawResults =
+			isRecord(payload) && Array.isArray(payload.results) ? payload.results : [];
+
+		if (tab === 'news') {
+			return {
+				query: queryValue || query,
+				tab: 'news',
+				results: [],
+				newsResults: rawResults
+					.map(normalizeNewsResult)
+					.filter((r): r is NewsResult => r !== null)
+			};
+		}
+
+		if (tab === 'videos') {
+			return {
+				query: queryValue || query,
+				tab: 'videos',
+				results: [],
+				videoResults: rawResults
+					.map(normalizeVideoResult)
+					.filter((r): r is VideoResult => r !== null)
+			};
+		}
+
+		return {
+			query: queryValue || query,
+			tab: 'images',
+			results: [],
+			imageResults: rawResults
+				.map(normalizeImageResult)
+				.filter((r): r is ImageResult => r !== null)
+		};
+	} finally {
+		clearTimeout(timeout);
+	}
+}
+
+export async function searchBrave(
+	query: string,
+	options: { safesearch?: boolean; offset?: number; tab?: SearchTab; freshness?: string; country?: string; filterAds?: boolean; blockAds?: boolean; blockTrackers?: boolean } = {},
+	fetchImpl: typeof fetch = fetch
+): Promise<SearchResponse> {
+	const normalizedQuery = normalizeSearchQuery(query);
+	if (!normalizedQuery) throw new Error(SEARCH_QUERY_ERROR);
+
+	return await fetchBraveSearch(
+		normalizedQuery,
+		options.tab ?? 'web',
+		options.safesearch ? 'strict' : 'moderate',
+		Math.max(0, options.offset ?? 0),
+		options.freshness,
+		fetchImpl,
+		options.country,
+		options.filterAds,
+		options.blockAds,
+		options.blockTrackers
+	);
+}
