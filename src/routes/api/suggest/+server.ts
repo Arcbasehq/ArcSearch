@@ -1,7 +1,21 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
+import { consumeRateLimit } from '$lib/server/search';
 
-export const GET: RequestHandler = async ({ url, fetch }) => {
-	const q = url.searchParams.get('q')?.trim();
+export const GET: RequestHandler = async ({ url, fetch, request, getClientAddress }) => {
+	const clientKey =
+		request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+		getClientAddress() ||
+		'unknown';
+
+	const rateLimit = consumeRateLimit(clientKey);
+	if (!rateLimit.allowed) {
+		return json([], {
+			headers: { 'Cache-Control': 'no-store', 'Retry-After': String(rateLimit.retryAfterSeconds) },
+			status: 429
+		});
+	}
+
+	const q = url.searchParams.get('q')?.trim().slice(0, 200);
 
 	if (!q) {
 		return json([], { headers: { 'Cache-Control': 'no-store' } });

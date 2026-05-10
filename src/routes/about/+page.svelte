@@ -46,9 +46,11 @@
 <header
 	class="sticky top-0 z-20 border-b border-white/5 bg-[var(--app-background)]/95 backdrop-blur"
 >
-	<div class="mx-auto w-full max-w-[1100px] pl-4 pr-14 sm:px-6">
+	<div class="mx-auto w-full max-w-[1100px] pr-14 pl-4 sm:px-6">
 		<div class="flex items-center gap-3 py-3 sm:gap-5">
-			<a href="/" class="hidden shrink-0 text-lg font-semibold tracking-tight text-[var(--app-text)] sm:block"
+			<a
+				href="/"
+				class="hidden shrink-0 text-lg font-semibold tracking-tight text-[var(--app-text)] sm:block"
 				>ArcSearch</a
 			>
 			<div class="max-w-2xl flex-1">
@@ -68,7 +70,11 @@
 <main class="bg-[var(--app-background)] text-[var(--app-text)]">
 	<!-- Hero -->
 	<section class="mx-auto w-full max-w-[1100px] px-6 py-16 text-center sm:py-24">
-		<img src="/logo.png" alt="ArcSearch" class="mx-auto mb-6 h-16 w-16 rounded-2xl sm:mb-8 sm:h-20 sm:w-20" />
+		<img
+			src="/logo.png"
+			alt="ArcSearch"
+			class="mx-auto mb-6 h-16 w-16 rounded-2xl sm:mb-8 sm:h-20 sm:w-20"
+		/>
 		<h1 class="mx-auto max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl lg:text-7xl">
 			Search the web.<br />
 			<span class="text-[var(--app-accent)]">Leave no trace.</span>
@@ -91,6 +97,15 @@
 			>
 				<i class="fa-solid fa-sliders text-xs"></i>
 				Customize settings
+			</a>
+			<a
+				href="https://github.com/Arcbasehq/ArcSearch"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-6 py-3 text-sm font-semibold text-[var(--app-text)] transition hover:bg-white/5"
+			>
+				<i class="fa-brands fa-github text-xs"></i>
+				View on GitHub
 			</a>
 		</div>
 	</section>
@@ -268,6 +283,38 @@
 							<a
 								href="/settings#appearance"
 								class="text-[var(--app-muted)] transition hover:text-[var(--app-text)]">Themes</a
+							>
+						</li>
+						<li>
+							<a
+								href="https://github.com/Arcbasehq/ArcSearch"
+								target="_blank"
+								rel="noopener noreferrer"
+								class="inline-flex items-center gap-1.5 text-[var(--app-muted)] transition hover:text-[var(--app-text)]"
+							>
+								<i class="fa-brands fa-github text-xs"></i>
+								GitHub
+							</a>
+						</li>
+					</ul>
+				</div>
+				<div class="space-y-3">
+					<p class="text-xs font-semibold tracking-widest text-[var(--app-muted)] uppercase">
+						Company
+					</p>
+					<ul class="space-y-2 text-sm">
+						<li>
+							<a
+								href="https://arcbase.one"
+								class="text-[var(--app-muted)] transition hover:text-[var(--app-text)]"
+								target="_blank">Arcbase</a
+							>
+						</li>
+						<li>
+							<a
+								href="https://ai.arcbase.one"
+								class="text-[var(--app-muted)] transition hover:text-[var(--app-text)]"
+								target="_blank">OtterAI</a
 							>
 						</li>
 					</ul>
