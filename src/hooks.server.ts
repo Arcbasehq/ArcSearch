@@ -4,7 +4,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 	'X-Content-Type-Options': 'nosniff',
 	'X-Frame-Options': 'DENY',
 	'Referrer-Policy': 'no-referrer',
-	'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()',
+	'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=()',
 	'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
 	'X-DNS-Prefetch-Control': 'off',
 	'Content-Security-Policy': [
