@@ -12,7 +12,7 @@ const SECURITY_HEADERS: Record<string, string> = {
 		"script-src 'self' 'unsafe-inline'",
 		"style-src 'self' 'unsafe-inline'",
 		"img-src 'self' https: data:",
-		"font-src 'self'",
+		"font-src 'self' data:",
 		"connect-src 'self'",
 		"frame-src 'none'",
 		"object-src 'none'",
