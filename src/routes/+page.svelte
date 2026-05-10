@@ -65,7 +65,11 @@
 	<div class="mx-auto flex min-h-screen w-full max-w-3xl items-center px-6 py-12">
 		<div class="w-full space-y-8 text-center">
 			<div class="space-y-3">
-				<img src="/logo.png" alt="ArcSearch logo" class="mx-auto h-24 w-24 rounded-full sm:h-32 sm:w-32 lg:h-37 lg:w-37" />
+				<img
+					src="/logo.png"
+					alt="ArcSearch logo"
+					class="mx-auto h-24 w-24 rounded-full sm:h-32 sm:w-32 lg:h-37 lg:w-37"
+				/>
 				<a href="/about" class="inline-block">
 					<h1 class="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">ArcSearch</h1>
 				</a>
@@ -96,21 +100,21 @@
 		></button>
 
 		<div
-			class="absolute right-0 bottom-14 z-50 w-[min(16rem,calc(100vw-3rem))] overflow-hidden rounded-2xl border border-white/10 bg-[#1c1c1c] shadow-2xl shadow-black/50"
+			class="absolute right-0 bottom-14 z-50 w-[min(16rem,calc(100vw-3rem))] overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[#1c1c1c] shadow-2xl shadow-black/50"
 			transition:fly={{ y: 8, duration: $reducedMotion ? 0 : 180, easing: cubicOut }}
 		>
-			<div class="border-b border-white/8 px-4 py-3">
+			<div class="border-b border-[var(--app-border)] px-4 py-3">
 				<p class="text-xs font-semibold tracking-widest text-[var(--app-muted)] uppercase">
 					Quick settings
 				</p>
 			</div>
-			<div class="divide-y divide-white/5 px-1 py-1">
+			<div class="divide-y divide-[var(--app-border)] px-1 py-1">
 				{#each quickSettings as s}
 					{@const checked = getToggle($settingsStore, s.id)}
 					<button
 						type="button"
 						onclick={() => settingsStore.toggle(s.id)}
-						class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm transition hover:bg-white/5"
+						class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm transition hover:bg-[var(--app-hover)]"
 					>
 						<span class={checked ? 'text-[var(--app-text)]' : 'text-[var(--app-muted)]'}
 							>{s.label}</span
@@ -118,7 +122,7 @@
 						<div
 							class={checked
 								? 'flex h-5 w-5 items-center justify-center rounded-full bg-[var(--app-accent)] text-[#111]'
-								: 'h-5 w-5 rounded-full border border-white/20'}
+								: 'h-5 w-5 rounded-full border border-[var(--app-border)]'}
 						>
 							{#if checked}
 								<i class="fa-solid fa-check text-[9px]"></i>
@@ -127,7 +131,7 @@
 					</button>
 				{/each}
 			</div>
-			<div class="border-t border-white/8 px-4 py-3">
+			<div class="border-t border-[var(--app-border)] px-4 py-3">
 				<a
 					href="/settings"
 					class="text-xs text-[var(--app-accent)] hover:underline"
@@ -142,7 +146,7 @@
 	<button
 		type="button"
 		onclick={() => (customizeOpen = !customizeOpen)}
-		class="flex items-center gap-2 rounded-full border border-white/10 bg-[#1c1c1c] px-4 py-2.5 text-sm font-medium text-[var(--app-text)] shadow-lg shadow-black/30 transition hover:bg-white/10"
+		class="flex items-center gap-2 rounded-full border border-[var(--app-border)] bg-[#1c1c1c] px-4 py-2.5 text-sm font-medium text-[var(--app-text)] shadow-lg shadow-black/30 transition hover:bg-[var(--app-hover)]"
 	>
 		<i class="fa-solid fa-sliders text-xs"></i>
 		Customize

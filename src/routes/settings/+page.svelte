@@ -95,7 +95,7 @@
 </svelte:head>
 
 <header
-	class="sticky top-0 z-20 border-b border-white/5 bg-[var(--app-background)]/95 backdrop-blur"
+	class="sticky top-0 z-20 border-b border-[var(--app-border)] bg-[var(--app-background)]/95 backdrop-blur"
 >
 	<div class="mx-auto w-full max-w-[1100px] pl-4 pr-14 sm:px-6">
 		<div class="flex items-center gap-3 py-3 sm:gap-5">
@@ -127,8 +127,8 @@
 						type="button"
 						onclick={() => (activeTab = tab.id)}
 						class={activeTab === tab.id
-							? 'rounded-full bg-white/15 px-4 py-1.5 text-sm font-semibold text-[var(--app-text)] ring-1 ring-white/20'
-							: 'rounded-full px-4 py-1.5 text-sm font-medium text-[var(--app-muted)] transition hover:bg-white/8 hover:text-[var(--app-text)]'}
+							? 'rounded-full bg-[var(--app-hover)] px-4 py-1.5 text-sm font-semibold text-[var(--app-text)] ring-1 ring-white/20'
+							: 'rounded-full px-4 py-1.5 text-sm font-medium text-[var(--app-muted)] transition hover:bg-[var(--app-hover)] hover:text-[var(--app-text)]'}
 					>
 						{tab.label}
 					</button>
@@ -186,7 +186,7 @@
 					</div>
 				{/if}
 
-				<div class="divide-y divide-white/8 rounded-2xl border border-white/8 bg-white/[0.02]">
+				<div class="divide-y divide-[var(--app-border)] border border-[var(--app-border)] bg-[var(--app-surface)]">
 					{#each categoryGroups[activeTab] as group, gi (gi)}
 						{#each group.ids as id (id)}
 							{@const setting = getSetting(id)}
@@ -204,8 +204,8 @@
 											type="button"
 											onclick={() => handleToggle(setting.id)}
 											class={setting.checked
-												? 'shrink-0 rounded-full bg-[var(--app-accent)] px-4 py-1.5 text-sm font-semibold text-[#111111] transition hover:opacity-90'
-												: 'shrink-0 rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:bg-white/15 hover:text-[var(--app-text)]'}
+												? 'shrink-0 rounded-lg bg-[var(--app-accent)] px-4 py-1.5 text-sm font-semibold text-[#111111] transition hover:opacity-90'
+												: 'shrink-0 rounded-lg bg-[var(--app-hover)] px-4 py-1.5 text-sm font-semibold text-[var(--app-muted)] transition hover:bg-[var(--app-hover)] hover:text-[var(--app-text)]'}
 										>
 											{setting.checked ? 'On' : 'Off'}
 										</button>
@@ -222,7 +222,7 @@
 
 						<!-- Divider between groups (not after last group) -->
 						{#if gi < categoryGroups[activeTab].length - 1}
-							<div class="border-t-2 border-white/5"></div>
+							<div class="border-t-2 border-[var(--app-border)]"></div>
 						{/if}
 					{/each}
 				</div>
@@ -241,7 +241,7 @@
 			<!-- Right: sidebar cards -->
 			<div class="hidden w-72 shrink-0 space-y-4 lg:block">
 				<!-- Privacy card -->
-				<div class="rounded-2xl border border-white/8 bg-white/[0.02] p-6 text-center">
+				<div class="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 text-center">
 					<div
 						class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400"
 					>
@@ -254,7 +254,7 @@
 				</div>
 
 				<!-- Keyboard shortcuts card -->
-				<div class="rounded-2xl border border-white/8 bg-white/[0.02] p-5">
+				<div class="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5">
 					<p class="mb-3 text-sm font-semibold text-[var(--app-text)]">Keyboard shortcuts</p>
 					<dl class="space-y-2">
 						{#each [['/', 'Focus search'], ['Esc', 'Close suggestions'], ['↑ ↓', 'Navigate suggestions'], ['Enter', 'Select suggestion']] as [key, desc]}
@@ -262,7 +262,7 @@
 								<dd class="text-xs text-[var(--app-muted)]">{desc}</dd>
 								<dt>
 									<kbd
-										class="rounded border border-white/10 bg-white/8 px-1.5 py-0.5 font-mono text-xs text-[var(--app-text)]"
+										class="rounded border border-[var(--app-border)] bg-[var(--app-hover)] px-1.5 py-0.5 font-mono text-xs text-[var(--app-text)]"
 										>{key}</kbd
 									>
 								</dt>
@@ -278,7 +278,7 @@
 <!-- Sticky save bar -->
 {#if isDirty || savedFeedback}
 	<div
-		class="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[var(--app-background)]/95 px-6 py-4 backdrop-blur"
+		class="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--app-border)] bg-[var(--app-background)]/95 px-6 py-4 backdrop-blur"
 		transition:fly={{ y: 60, duration: $reducedMotion ? 0 : 220, easing: cubicOut }}
 	>
 		<div class="mx-auto flex max-w-[1100px] items-center justify-between gap-4">
@@ -294,7 +294,7 @@
 					<button
 						type="button"
 						onclick={discard}
-						class="rounded-xl px-4 py-2 text-sm text-[var(--app-muted)] transition hover:bg-white/8 hover:text-[var(--app-text)]"
+						class="rounded-xl px-4 py-2 text-sm text-[var(--app-muted)] transition hover:bg-[var(--app-hover)] hover:text-[var(--app-text)]"
 					>
 						Discard
 					</button>

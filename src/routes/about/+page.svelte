@@ -44,7 +44,7 @@
 
 <!-- Sticky header -->
 <header
-	class="sticky top-0 z-20 border-b border-white/5 bg-[var(--app-background)]/95 backdrop-blur"
+	class="sticky top-0 z-20 border-b border-[var(--app-border)] bg-[var(--app-background)]/95 backdrop-blur"
 >
 	<div class="mx-auto w-full max-w-[1100px] pr-14 pl-4 sm:px-6">
 		<div class="flex items-center gap-3 py-3 sm:gap-5">
@@ -93,7 +93,7 @@
 			</a>
 			<a
 				href="/settings"
-				class="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-6 py-3 text-sm font-semibold text-[var(--app-text)] transition hover:bg-white/5"
+				class="inline-flex items-center gap-2 rounded-2xl border border-[var(--app-border)] px-6 py-3 text-sm font-semibold text-[var(--app-text)] transition hover:bg-[var(--app-hover)]"
 			>
 				<i class="fa-solid fa-sliders text-xs"></i>
 				Customize settings
@@ -102,7 +102,7 @@
 				href="https://github.com/Arcbasehq/ArcSearch"
 				target="_blank"
 				rel="noopener noreferrer"
-				class="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-6 py-3 text-sm font-semibold text-[var(--app-text)] transition hover:bg-white/5"
+				class="inline-flex items-center gap-2 rounded-2xl border border-[var(--app-border)] px-6 py-3 text-sm font-semibold text-[var(--app-text)] transition hover:bg-[var(--app-hover)]"
 			>
 				<i class="fa-brands fa-github text-xs"></i>
 				View on GitHub
@@ -110,7 +110,7 @@
 		</div>
 	</section>
 
-	<div class="border-t border-white/5"></div>
+	<div class="border-t border-[var(--app-border)]"></div>
 
 	<!-- Privacy pillars -->
 	<section class="mx-auto w-full max-w-[1100px] px-6 py-12 sm:py-20">
@@ -119,7 +119,7 @@
 		</h2>
 		<div class="grid gap-6 sm:grid-cols-3">
 			{#each [{ icon: 'fa-eye-slash', title: 'No tracking', color: 'text-emerald-400', bg: 'bg-emerald-500/15', desc: 'We never log your searches, store your IP, or tie queries to any account. Every search starts completely fresh.' }, { icon: 'fa-database', title: 'No profiles', color: 'text-blue-400', bg: 'bg-blue-500/15', desc: "We never build an advertising profile from your searches. Your data isn't packaged or sold to anyone, ever." }, { icon: 'fa-lock', title: 'Local by default', color: 'text-violet-400', bg: 'bg-violet-500/15', desc: 'Your settings, history, and theme are stored entirely in your browser. Nothing is synced to any server.' }] as pillar}
-				<div class="rounded-2xl border border-white/8 bg-white/[0.02] p-7">
+				<div class="rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-7">
 					<div
 						class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl {pillar.bg} {pillar.color}"
 					>
@@ -132,7 +132,7 @@
 		</div>
 	</section>
 
-	<div class="border-t border-white/5"></div>
+	<div class="border-t border-[var(--app-border)]"></div>
 
 	<!-- How it works -->
 	<section class="mx-auto w-full max-w-[1100px] px-6 py-12 sm:py-20">
@@ -157,7 +157,7 @@
 			<div class="space-y-3">
 				{#each [{ icon: 'fa-keyboard', label: 'You type a query', color: 'text-[var(--app-accent)]', bg: 'bg-[var(--app-accent)]/10' }, { icon: 'fa-server', label: 'ArcSearch proxies it anonymously', color: 'text-blue-400', bg: 'bg-blue-500/10' }, { icon: 'fa-globe', label: 'Real results come back to you', color: 'text-emerald-400', bg: 'bg-emerald-500/10' }, { icon: 'fa-display', label: 'You see results - nothing is stored', color: 'text-violet-400', bg: 'bg-violet-500/10' }] as step, i}
 					<div
-						class="flex items-center gap-4 rounded-2xl border border-white/8 bg-white/[0.02] px-5 py-4"
+						class="flex items-center gap-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] px-5 py-4"
 					>
 						<div
 							class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {step.bg} {step.color}"
@@ -174,7 +174,7 @@
 		</div>
 	</section>
 
-	<div class="border-t border-white/5"></div>
+	<div class="border-t border-[var(--app-border)]"></div>
 
 	<!-- Features grid -->
 	<section class="mx-auto w-full max-w-[1100px] px-6 py-12 sm:py-20">
@@ -188,9 +188,9 @@
 		</h2>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each [{ icon: 'fa-newspaper', title: 'News', desc: 'Top stories from across the web, without the filter bubble.' }, { icon: 'fa-play', title: 'Videos', desc: 'Find and preview videos from any source.' }, { icon: 'fa-image', title: 'Images', desc: 'Visual search with a clean, responsive grid.' }, { icon: 'fa-bolt', title: 'Instant answers', desc: 'Knowledge panels for quick facts about people, places, and things.' }, { icon: 'fa-clock-rotate-left', title: 'Search history', desc: 'Optional local-only history for fast autocomplete. Clear it any time.' }, { icon: 'fa-palette', title: 'Themes', desc: 'Light, dark, slate, and sand - switch any time from settings.' }] as f}
-				<div class="flex gap-4 rounded-2xl border border-white/8 bg-white/[0.02] p-5">
+				<div class="flex gap-4 rounded-2xl border border-[var(--app-border)] bg-[var(--app-surface)] p-5">
 					<div
-						class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/5 text-[var(--app-accent)]"
+						class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--app-surface)] text-[var(--app-accent)]"
 					>
 						<i class="fa-solid {f.icon} text-sm"></i>
 					</div>
@@ -203,7 +203,7 @@
 		</div>
 	</section>
 
-	<div class="border-t border-white/5"></div>
+	<div class="border-t border-[var(--app-border)]"></div>
 
 	<!-- CTA -->
 	<section class="mx-auto w-full max-w-[1100px] px-6 py-16 text-center sm:py-24">
@@ -219,7 +219,7 @@
 	</section>
 </main>
 
-<footer class="border-t border-white/5 bg-[var(--app-background)]">
+<footer class="border-t border-[var(--app-border)] bg-[var(--app-background)]">
 	<div class="mx-auto w-full max-w-[1100px] px-6 py-12">
 		<div class="flex flex-col gap-8 sm:flex-row sm:justify-between">
 			<!-- Brand -->
@@ -323,7 +323,7 @@
 		</div>
 
 		<div
-			class="mt-10 flex flex-col items-start justify-between gap-4 border-t border-white/5 pt-8 sm:flex-row sm:items-center"
+			class="mt-10 flex flex-col items-start justify-between gap-4 border-t border-[var(--app-border)] pt-8 sm:flex-row sm:items-center"
 		>
 			<div class="flex items-center gap-3">
 				<p class="text-xs text-[var(--app-muted)]">
@@ -331,12 +331,12 @@
 				</p>
 				<span class="text-[var(--app-muted)]">·</span>
 				<span
-					class="rounded-full border border-white/8 bg-white/[0.03] px-2 py-0.5 text-xs text-[var(--app-muted)]"
+					class="rounded-full border border-[var(--app-border)] bg-[var(--app-surface)] px-2 py-0.5 text-xs text-[var(--app-muted)]"
 					>v0.0.1</span
 				>
 			</div>
 			<div
-				class="flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5"
+				class="flex items-center gap-2 rounded-full border border-[var(--app-border)] bg-[var(--app-surface)] px-3 py-1.5"
 			>
 				<div class="h-1.5 w-1.5 rounded-full bg-emerald-400"></div>
 				<span class="text-xs text-[var(--app-muted)]">No cookies. No logs. No tracking.</span>

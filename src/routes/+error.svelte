@@ -38,7 +38,7 @@
 		</a>
 		<a
 			href="/search?q="
-			class="inline-flex items-center gap-2 rounded-2xl border border-white/10 px-5 py-2.5 text-sm font-medium text-[var(--app-text)] transition hover:bg-white/5"
+			class="inline-flex items-center gap-2 rounded-2xl border border-[var(--app-border)] px-5 py-2.5 text-sm font-medium text-[var(--app-text)] transition hover:bg-[var(--app-hover)]"
 		>
 			<i class="fa-solid fa-magnifying-glass text-xs"></i>
 			Search

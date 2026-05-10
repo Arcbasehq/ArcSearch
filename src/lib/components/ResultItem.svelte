@@ -44,7 +44,7 @@
 	});
 </script>
 
-<article class="group rounded-2xl px-1 transition hover:bg-white/5">
+<article class="group rounded-2xl px-1 transition hover:bg-[var(--app-hover)]">
 	<a
 		{href}
 		target={openInNewTab ? '_blank' : '_self'}

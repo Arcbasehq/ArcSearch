@@ -10,7 +10,7 @@
 </script>
 
 <article
-	class="group overflow-hidden rounded-2xl border border-white/10 bg-[var(--app-panel)]/30 transition hover:border-white/20"
+	class="group overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)]/30 transition hover:border-[var(--app-border)]"
 >
 	<a
 		href={result.url}

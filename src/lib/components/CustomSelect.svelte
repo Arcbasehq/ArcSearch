@@ -36,7 +36,7 @@
 		bind:this={buttonEl}
 		type="button"
 		onclick={() => (open = !open)}
-		class="flex items-center gap-2 rounded-full border border-white/10 bg-white/8 px-3.5 py-1.5 text-xs font-medium text-[var(--app-text)] transition hover:border-white/20 hover:bg-white/12 focus:outline-none"
+		class="flex items-center gap-2 rounded-full border border-[var(--app-border)] bg-[var(--app-hover)] px-3.5 py-1.5 text-xs font-medium text-[var(--app-text)] transition hover:border-[var(--app-border)] hover:bg-[var(--app-hover)] focus:outline-none"
 	>
 		<span>{currentLabel}</span>
 		<i class="fa-solid fa-chevron-down text-[10px] text-[var(--app-muted)] transition-transform duration-150" class:rotate-180={open}></i>
@@ -53,15 +53,15 @@
 		></button>
 
 		<!-- Dropdown -->
-		<div class="absolute right-0 z-40 mt-1.5 min-w-[10rem] overflow-hidden rounded-xl border border-white/10 bg-[#1f1f1f] py-1 shadow-2xl shadow-black/40"
+		<div class="absolute right-0 z-40 mt-1.5 min-w-[10rem] overflow-hidden rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] py-1 shadow-2xl shadow-black/40"
 			transition:fly={{ y: -4, duration: $reducedMotion ? 0 : 140, easing: cubicOut }}>
 			{#each options as opt}
 				<button
 					type="button"
 					onclick={() => select(opt.value)}
 					class={opt.value === value
-						? 'flex w-full items-center justify-between gap-6 px-4 py-2 text-left text-sm font-medium text-[var(--app-text)] bg-white/8'
-						: 'flex w-full items-center px-4 py-2 text-left text-sm text-[var(--app-muted)] transition hover:bg-white/5 hover:text-[var(--app-text)]'}
+						? 'flex w-full items-center justify-between gap-6 px-4 py-2 text-left text-sm font-medium text-[var(--app-text)] bg-[var(--app-hover)]'
+						: 'flex w-full items-center px-4 py-2 text-left text-sm text-[var(--app-muted)] transition hover:bg-[var(--app-hover)] hover:text-[var(--app-text)]'}
 				>
 					{opt.label}
 					{#if opt.value === value}

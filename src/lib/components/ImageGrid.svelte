@@ -15,10 +15,10 @@
 			href={image.url}
 			target={openInNewTab ? '_blank' : '_self'}
 			rel="noreferrer noopener"
-			class="group overflow-hidden rounded-xl border border-white/10 transition hover:border-white/25"
+			class="group overflow-hidden rounded-xl border border-[var(--app-border)] transition hover:border-[var(--app-border)]"
 			title={image.title}
 		>
-			<div class="aspect-square bg-white/5">
+			<div class="aspect-square bg-[var(--app-surface)]">
 				<img
 					src={image.thumbnail}
 					alt={image.title}

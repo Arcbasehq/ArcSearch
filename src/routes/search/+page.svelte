@@ -102,7 +102,7 @@
 <main class="min-h-screen bg-[var(--app-background)] text-[var(--app-text)]">
 	<!-- Sticky header -->
 	<header
-		class="sticky top-0 z-20 border-b border-white/5 bg-[var(--app-background)]/95 backdrop-blur"
+		class="sticky top-0 z-20 border-b border-[var(--app-border)] bg-[var(--app-background)]/95 backdrop-blur"
 	>
 		<div class="mx-auto w-full max-w-[1200px] pl-4 pr-14 sm:px-6">
 			<div class="flex items-center gap-3 py-3 sm:gap-5">
@@ -122,8 +122,10 @@
 			</div>
 
 			<!-- Tabs row -->
-			<div class="flex items-center justify-between overflow-x-auto">
-				<SearchTabs current={data.tab} query={data.query} freshness={data.freshness} />
+			<div class="flex items-center justify-between">
+				<div class="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+					<SearchTabs current={data.tab} query={data.query} freshness={data.freshness} />
+				</div>
 
 				<!-- Time filter -->
 				{#if data.tab !== 'images'}
@@ -175,7 +177,7 @@
 									type="button"
 									onclick={loadMore}
 									disabled={loadingMore}
-									class="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-[var(--app-panel)] px-6 py-2.5 text-sm font-medium text-[var(--app-text)] transition hover:bg-white/10 disabled:opacity-50"
+									class="inline-flex items-center gap-2 rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)] px-6 py-2.5 text-sm font-medium text-[var(--app-text)] transition hover:bg-[var(--app-hover)] disabled:opacity-50"
 								>
 									{#if loadingMore}
 										<i class="fa-solid fa-spinner animate-spin text-xs"></i>

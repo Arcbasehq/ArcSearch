@@ -194,8 +194,8 @@
 
 	<div
 		class={compact
-			? 'flex w-full items-center rounded-xl border border-white/10 bg-[var(--app-panel)] px-4 py-1.5 transition focus-within:border-slate-500/60 focus-within:ring-2 focus-within:ring-slate-500/20'
-			: 'flex w-full items-center rounded-xl border border-white/10 bg-[var(--app-panel)] px-5 py-2 transition focus-within:border-slate-500/60 focus-within:ring-2 focus-within:ring-slate-500/20'}
+			? 'flex w-full items-center rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] px-4 py-1.5 transition focus-within:border-slate-500/60 focus-within:ring-2 focus-within:ring-slate-500/20'
+			: 'flex w-full items-center rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] px-5 py-2 transition focus-within:border-slate-500/60 focus-within:ring-2 focus-within:ring-slate-500/20'}
 	>
 		<input
 			bind:value={query}
@@ -229,14 +229,14 @@
 	{#if isOpen && dropdownItems.length > 0}
 		<div class="relative">
 			<div
-				class="absolute left-0 right-0 top-2 z-20 overflow-hidden rounded-xl border border-white/10 bg-[#1f1f1f] shadow-2xl shadow-black/30"
+				class="absolute left-0 right-0 top-2 z-20 overflow-hidden rounded-xl border border-[var(--app-border)] bg-[var(--app-panel)] shadow-2xl shadow-black/30"
 				transition:fly={{ y: -6, duration: $reducedMotion ? 0 : 160, easing: cubicOut }}
 			>
 				{#each dropdownItems as item, index}
 					<div
 						class={index === activeIndex
-							? 'flex w-full items-center gap-3 bg-white/5 px-4 py-2.5'
-							: 'flex w-full items-center gap-3 px-4 py-2.5 hover:bg-white/5'}
+							? 'flex w-full items-center gap-3 bg-[var(--app-surface)] px-4 py-2.5'
+							: 'flex w-full items-center gap-3 px-4 py-2.5 hover:bg-[var(--app-hover)]'}
 					>
 						<button
 							type="button"
@@ -249,13 +249,13 @@
 						>
 							<i
 								class={item.type === 'history'
-									? 'fa-solid fa-clock-rotate-left shrink-0 text-xs text-zinc-500'
-									: 'fa-solid fa-magnifying-glass shrink-0 text-xs text-zinc-500'}
+									? 'fa-solid fa-clock-rotate-left shrink-0 text-xs text-[var(--app-muted)]'
+									: 'fa-solid fa-magnifying-glass shrink-0 text-xs text-[var(--app-muted)]'}
 							></i>
 							<span
 								class={index === activeIndex
-									? 'truncate text-sm text-zinc-50'
-									: 'truncate text-sm text-zinc-300'}>{item.text}</span
+									? 'truncate text-sm text-[var(--app-text)]'
+									: 'truncate text-sm text-[var(--app-muted)]'}>{item.text}</span
 							>
 						</button>
 
@@ -263,7 +263,7 @@
 							<button
 								type="button"
 								aria-label="Remove from history"
-								class="ml-auto shrink-0 text-zinc-600 transition hover:text-zinc-300"
+								class="ml-auto shrink-0 text-[var(--app-muted)] transition hover:text-[var(--app-text)]"
 								onmousedown={(event) => removeHistory(item.text, event)}
 							>
 								<i class="fa-solid fa-xmark text-xs"></i>
@@ -273,10 +273,10 @@
 				{/each}
 
 				{#if dropdownItems.some((i) => i.type === 'history')}
-					<div class="border-t border-white/5 px-4 py-2">
+					<div class="border-t border-[var(--app-border)] px-4 py-2">
 						<button
 							type="button"
-							class="text-xs text-zinc-600 transition hover:text-zinc-400"
+							class="text-xs text-[var(--app-muted)] transition hover:text-[var(--app-text)]"
 							onmousedown={(event) => {
 								event.preventDefault();
 								historyStore.clear();

@@ -28,7 +28,7 @@
 			href={tabHref(tab.id)}
 			class={current === tab.id
 				? 'flex items-center gap-2 border-b-2 border-[var(--app-accent)] px-3 pb-2.5 pt-1 text-sm font-medium text-[var(--app-accent)]'
-				: 'flex items-center gap-2 border-b-2 border-transparent px-3 pb-2.5 pt-1 text-sm font-medium text-[var(--app-muted)] transition hover:border-white/20 hover:text-[var(--app-text)]'}
+				: 'flex items-center gap-2 border-b-2 border-transparent px-3 pb-2.5 pt-1 text-sm font-medium text-[var(--app-muted)] transition hover:border-[var(--app-border)] hover:text-[var(--app-text)]'}
 		>
 			<i class={`fa-solid ${tab.icon} text-xs`}></i>
 			{tab.label}

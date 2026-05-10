@@ -67,7 +67,7 @@
 
 <button
 	type="button"
-	class="fixed top-4 right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full text-zinc-100 transition hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-slate-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-background)] focus-visible:outline-none"
+	class="fixed top-4 right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full text-zinc-100 transition hover:bg-[var(--app-hover)] focus-visible:ring-2 focus-visible:ring-slate-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-background)] focus-visible:outline-none"
 	aria-label="Open menu"
 	aria-expanded={menuOpen}
 	onclick={() => (menuOpen = !menuOpen)}
@@ -85,14 +85,14 @@
 	></button>
 
 	<aside
-		class="fixed top-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-white/10 bg-[#262626] px-5 py-6 text-zinc-50 shadow-2xl shadow-black/30 sm:w-[20rem]"
+		class="fixed top-0 right-0 z-40 flex h-full w-full flex-col overflow-y-auto border-l border-[var(--app-border)] bg-[#262626] px-5 py-6 text-zinc-50 shadow-2xl shadow-black/30 sm:w-[20rem]"
 		transition:fly={{ x: 400, duration: $reducedMotion ? 0 : 280, easing: cubicOut }}
 	>
 		<div class="flex items-center justify-between">
 			<p class="text-sm font-medium tracking-[0.2em] text-zinc-400 uppercase">Menu</p>
 			<button
 				type="button"
-				class="rounded-full p-2 text-zinc-400 transition hover:bg-white/5 hover:text-zinc-100"
+				class="rounded-full p-2 text-zinc-400 transition hover:bg-[var(--app-hover)] hover:text-zinc-100"
 				aria-label="Close menu"
 				onclick={() => (menuOpen = false)}
 			>
@@ -110,7 +110,7 @@
 					{ label: 'Settings', href: '/settings', icon: 'fa-sliders' }
 				] as link (link.href)}
 					<a
-						class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-zinc-300 transition hover:bg-white/5 hover:text-white"
+						class="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-zinc-300 transition hover:bg-[var(--app-hover)] hover:text-white"
 						href={link.href}
 					>
 						<i class="fa-solid {link.icon} w-4 text-center text-xs text-zinc-500"></i>
@@ -134,12 +134,12 @@
 					<button
 						type="button"
 						onclick={() => settingsStore.toggle(s.id)}
-						class="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition hover:bg-white/5"
+						class="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition hover:bg-[var(--app-hover)]"
 					>
 						<span class={checked ? 'text-zinc-100' : 'text-zinc-500'}>{s.label}</span>
 						<div class={checked
 							? 'flex h-5 w-5 items-center justify-center rounded-full bg-[var(--app-accent)] text-[#111]'
-							: 'h-5 w-5 rounded-full border border-white/20'}>
+							: 'h-5 w-5 rounded-full border border-[var(--app-border)]'}>
 							{#if checked}<i class="fa-solid fa-check text-[9px]"></i>{/if}
 						</div>
 					</button>
@@ -193,7 +193,7 @@
 					{#each $historyStore.slice(0, 5) as item}
 						<a
 							href="/search?q={encodeURIComponent(item)}"
-							class="flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm text-zinc-400 transition hover:bg-white/5 hover:text-zinc-100"
+							class="flex items-center gap-2 rounded-xl px-3 py-1.5 text-sm text-zinc-400 transition hover:bg-[var(--app-hover)] hover:text-zinc-100"
 						>
 							<i class="fa-solid fa-clock-rotate-left text-[10px] text-zinc-600"></i>
 							<span class="truncate">{item}</span>
@@ -204,7 +204,7 @@
 		{/if}
 
 		<div class="mt-auto pt-8 text-xs text-zinc-600">
-			Press <kbd class="rounded border border-white/10 px-1 py-0.5 font-mono">/</kbd> to focus search
+			Press <kbd class="rounded border border-[var(--app-border)] px-1 py-0.5 font-mono">/</kbd> to focus search
 		</div>
 	</aside>
 {/if}

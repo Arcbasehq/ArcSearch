@@ -6,7 +6,7 @@
 	let attrs = $derived((infobox.attributes ?? []).slice(0, 8));
 </script>
 
-<aside class="overflow-hidden rounded-2xl border border-white/10 bg-[var(--app-panel)]/40">
+<aside class="overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)]/40">
 	{#if infobox.imageUrl}
 		<img
 			src={infobox.imageUrl}
@@ -40,7 +40,7 @@
 		{/if}
 
 		{#if attrs.length > 0}
-			<div class="border-t border-white/10 pt-4">
+			<div class="border-t border-[var(--app-border)] pt-4">
 				<dl class="space-y-2">
 					{#each attrs as [key, value]}
 						<div class="grid grid-cols-[auto_1fr] gap-x-4 text-sm">
@@ -53,7 +53,7 @@
 		{/if}
 
 		{#if infobox.profiles && infobox.profiles.length > 0}
-			<div class="border-t border-white/10 pt-4">
+			<div class="border-t border-[var(--app-border)] pt-4">
 				<p class="mb-2 text-xs font-medium text-[var(--app-muted)] uppercase tracking-wider">Quick links</p>
 				<div class="flex flex-wrap gap-x-4 gap-y-1">
 					{#each infobox.profiles as profile}

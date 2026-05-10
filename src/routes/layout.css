@@ -9,6 +9,9 @@
 	--app-accent: #8ab4f8;
 	--app-text: #fafafa;
 	--app-muted: #9ca3af;
+	--app-border: rgba(255,255,255,0.08);
+	--app-surface: rgba(255,255,255,0.025);
+	--app-hover: rgba(255,255,255,0.06);
 	background: var(--app-background);
 	color: var(--app-text);
 	font-family:
