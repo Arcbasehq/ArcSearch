@@ -12,8 +12,8 @@ import {
 	type SearchTab
 } from '$lib/search';
 
-const RATE_LIMIT_BUCKET_CAPACITY = 6;
-const RATE_LIMIT_REFILL_INTERVAL_MS = 10_000;
+const RATE_LIMIT_BUCKET_CAPACITY = 20;
+const RATE_LIMIT_REFILL_INTERVAL_MS = 5_000;
 const RATE_LIMIT_STATE_TTL_MS = 5 * 60_000;
 const REQUEST_TIMEOUT_MS = 8_000;
 
