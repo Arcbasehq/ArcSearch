@@ -24,7 +24,7 @@
 		{#if $page.status === 404}
 			The page you're looking for doesn't exist or has been moved.
 		{:else}
-			{$page.error?.message ?? 'An unexpected error occurred. Please try again.'}
+			An unexpected error occurred. Please try again.
 		{/if}
 	</p>
 

@@ -2,7 +2,10 @@
 	import type { VideoResult } from '$lib/search';
 	import { settingsStore } from '$lib/stores/settings';
 
-	let { result } = $props<{ result: VideoResult }>();
+	let { result, onselect } = $props<{
+		result: VideoResult;
+		onselect?: (v: VideoResult) => void;
+	}>();
 
 	let openInNewTab = $derived(
 		$settingsStore.find((s) => s.id === 'open-new-tab')?.checked ?? true
@@ -12,11 +15,13 @@
 <article
 	class="group overflow-hidden rounded-2xl border border-[var(--app-border)] bg-[var(--app-panel)]/30 transition hover:border-[var(--app-border)]"
 >
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 	<a
 		href={result.url}
 		target={openInNewTab ? '_blank' : '_self'}
 		rel="noreferrer noopener"
 		class="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-accent)]/50"
+		onclick={onselect ? (e) => { e.preventDefault(); onselect!(result); } : undefined}
 	>
 		<div class="relative aspect-video bg-black/30">
 			{#if result.thumbnail}

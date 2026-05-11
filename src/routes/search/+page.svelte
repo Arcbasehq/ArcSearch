@@ -7,10 +7,12 @@
 	import Infobox from '$lib/components/Infobox.svelte';
 	import NewsResultItem from '$lib/components/NewsResultItem.svelte';
 	import VideoResultItem from '$lib/components/VideoResultItem.svelte';
+	import VideoViewer from '$lib/components/VideoViewer.svelte';
 	import ImageGrid from '$lib/components/ImageGrid.svelte';
 	import CustomSelect from '$lib/components/CustomSelect.svelte';
 	import { settingsStore, getToggle } from '$lib/stores/settings';
 	import { historyStore } from '$lib/stores/history';
+	import type { VideoResult } from '$lib/search';
 
 	import type { PageData } from './$types';
 
@@ -20,6 +22,7 @@
 	let allResults = $state(data.results);
 	let loadingMore = $state(false);
 	let hasMore = $state(data.results.length >= 10);
+	let activeVideo = $state<VideoResult | null>(null);
 
 	$effect(() => {
 		query = data.query;
@@ -207,7 +210,7 @@
 					{#if data.videoResults && data.videoResults.length > 0}
 						<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 							{#each data.videoResults as result}
-								<VideoResultItem {result} />
+								<VideoResultItem {result} onselect={(v) => (activeVideo = v)} />
 							{/each}
 						</div>
 					{:else if data.query && !data.error}
@@ -233,3 +236,7 @@
 		</div>
 	</div>
 </main>
+
+{#if activeVideo}
+	<VideoViewer video={activeVideo} onclose={() => (activeVideo = null)} />
+{/if}
