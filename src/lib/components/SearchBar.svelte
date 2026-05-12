@@ -36,6 +36,7 @@
 	let blockAds = $derived(getToggle($settingsStore, 'block-ads'));
 	let blockTrackers = $derived(getToggle($settingsStore, 'block-trackers'));
 	let searchRegion = $derived(getSelect($settingsStore, 'search-region'));
+	let enableCache = $derived(getToggle($settingsStore, 'enable-cache', false));
 
 	let history = $derived($historyStore);
 
@@ -190,6 +191,9 @@
 	{/if}
 	{#if searchRegion}
 		<input type="hidden" name="region" value={searchRegion} />
+	{/if}
+	{#if enableCache}
+		<input type="hidden" name="enablecache" value="1" />
 	{/if}
 
 	<div

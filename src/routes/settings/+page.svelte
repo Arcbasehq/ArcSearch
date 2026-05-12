@@ -21,7 +21,8 @@
 	const categoryGroups: Record<SettingCategory, SettingGroup[]> = {
 		general: [
 			{ ids: ['open-new-tab', 'autocomplete', 'save-history'] },
-			{ ids: ['keyboard-shortcut', 'default-tab'] }
+			{ ids: ['keyboard-shortcut', 'default-tab'] },
+			{ ids: ['enable-cache'] }
 		],
 		appearance: [
 			{ ids: ['show-favicons', 'show-sitelinks', 'show-age'] },
@@ -86,6 +87,43 @@
 			draft = structuredClone($settingsStore);
 			isDirty = false;
 		}
+	}
+
+	function exportSettings() {
+		const json = JSON.stringify($settingsStore, null, 2);
+		const blob = new Blob([json], { type: 'application/json' });
+		const blobUrl = URL.createObjectURL(blob);
+		const anchor = document.createElement('a');
+		anchor.href = blobUrl;
+		anchor.download = 'arcsearch-settings.json';
+		anchor.click();
+		URL.revokeObjectURL(blobUrl);
+	}
+
+	let importFileInput = $state<HTMLInputElement | null>(null);
+
+	function triggerImport() {
+		importFileInput?.click();
+	}
+
+	function handleImport(event: Event) {
+		const file = (event.currentTarget as HTMLInputElement).files?.[0];
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			try {
+				const parsed = JSON.parse(e.target?.result as string) as unknown;
+				if (settingsStore.import(parsed)) {
+					draft = structuredClone($settingsStore);
+					isDirty = false;
+				}
+			} catch {
+				// Silently ignore malformed files
+			}
+		};
+		reader.readAsText(file);
+		// Reset so the same file can be re-imported if needed
+		(event.currentTarget as HTMLInputElement).value = '';
 	}
 </script>
 
@@ -227,15 +265,44 @@
 					{/each}
 				</div>
 
-				<!-- Reset button -->
-				<button
-					type="button"
-					onclick={resetAll}
-					class="mt-6 inline-flex items-center gap-2 rounded-xl border border-red-500/20 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/10"
-				>
-					<i class="fa-solid fa-rotate-left text-xs"></i>
-					Reset all to defaults
-				</button>
+				<!-- Action buttons row -->
+				<div class="mt-6 flex flex-wrap items-center gap-3">
+					<button
+						type="button"
+						onclick={exportSettings}
+						class="inline-flex items-center gap-2 rounded-xl border border-[var(--app-border)] px-4 py-2 text-sm text-[var(--app-muted)] transition hover:bg-[var(--app-hover)] hover:text-[var(--app-text)]"
+					>
+						<i class="fa-solid fa-download text-xs"></i>
+						Export settings
+					</button>
+
+					<button
+						type="button"
+						onclick={triggerImport}
+						class="inline-flex items-center gap-2 rounded-xl border border-[var(--app-border)] px-4 py-2 text-sm text-[var(--app-muted)] transition hover:bg-[var(--app-hover)] hover:text-[var(--app-text)]"
+					>
+						<i class="fa-solid fa-upload text-xs"></i>
+						Import settings
+					</button>
+
+					<button
+						type="button"
+						onclick={resetAll}
+						class="inline-flex items-center gap-2 rounded-xl border border-red-500/20 px-4 py-2 text-sm text-red-400 transition hover:bg-red-500/10"
+					>
+						<i class="fa-solid fa-rotate-left text-xs"></i>
+						Reset all to defaults
+					</button>
+				</div>
+
+				<!-- Hidden file input for import -->
+				<input
+					bind:this={importFileInput}
+					type="file"
+					accept="application/json,.json"
+					class="sr-only"
+					onchange={handleImport}
+				/>
 			</div>
 
 			<!-- Right: sidebar cards -->

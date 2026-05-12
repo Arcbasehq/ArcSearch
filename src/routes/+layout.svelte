@@ -61,6 +61,7 @@
 	<meta name="twitter:card" content="summary" />
 	<meta name="twitter:site" content="@arcsearch" />
 	<link rel="icon" href="/logo.png" />
+	<link rel="search" type="application/opensearchdescription+xml" title="ArcSearch" href="/opensearch.xml" />
 </svelte:head>
 
 <svelte:window onkeydown={handleKeydown} />

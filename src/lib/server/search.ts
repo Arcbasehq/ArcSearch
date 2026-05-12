@@ -16,6 +16,7 @@ const RATE_LIMIT_BUCKET_CAPACITY = 20;
 const RATE_LIMIT_REFILL_INTERVAL_MS = 5_000;
 const RATE_LIMIT_STATE_TTL_MS = 5 * 60_000;
 const REQUEST_TIMEOUT_MS = 8_000;
+const CACHE_TTL_MS = 5 * 60_000;
 
 const BRAVE_ENDPOINTS: Record<SearchTab, string> = {
 	web: 'https://api.search.brave.com/res/v1/web/search',
@@ -31,6 +32,33 @@ type RateLimitState = {
 };
 
 const rateLimitBuckets = new Map<string, RateLimitState>();
+
+type CacheEntry = { response: SearchResponse; expiresAt: number };
+const searchCache = new Map<string, CacheEntry>();
+
+function makeCacheKey(
+	query: string,
+	tab: SearchTab,
+	safesearch: string,
+	offset: number,
+	freshness: string | undefined,
+	country: string | undefined,
+	filterAds: boolean,
+	blockAds: boolean,
+	blockTrackers: boolean
+): string {
+	return JSON.stringify({
+		query,
+		tab,
+		safesearch,
+		offset,
+		freshness: freshness ?? '',
+		country: country ?? '',
+		filterAds,
+		blockAds,
+		blockTrackers
+	});
+}
 
 const HTML_ENTITY_MAP: Record<string, string> = {
 	amp: '&',
@@ -403,13 +431,23 @@ async function fetchBraveSearch(
 
 			const infobox = isRecord(payload) ? normalizeInfobox(payload.infobox) ?? undefined : undefined;
 
+			const resolvedQuery = queryValue || query;
+			const alteredQuery =
+				isRecord(payload) &&
+				isRecord(payload.query) &&
+				typeof payload.query.altered === 'string' &&
+				payload.query.altered.trim().toLowerCase() !== resolvedQuery.toLowerCase()
+					? payload.query.altered.trim()
+					: undefined;
+
 			return {
-				query: queryValue || query,
+				query: resolvedQuery,
 				tab: 'web',
 				results,
 				newsResults: newsResults.length > 0 ? newsResults : undefined,
 				videoResults: videoResults.length > 0 ? videoResults : undefined,
-				infobox
+				infobox,
+				didYouMean: alteredQuery
 			};
 		}
 
@@ -454,22 +492,53 @@ async function fetchBraveSearch(
 
 export async function searchBrave(
 	query: string,
-	options: { safesearch?: boolean; offset?: number; tab?: SearchTab; freshness?: string; country?: string; filterAds?: boolean; blockAds?: boolean; blockTrackers?: boolean } = {},
+	options: {
+		safesearch?: boolean;
+		offset?: number;
+		tab?: SearchTab;
+		freshness?: string;
+		country?: string;
+		filterAds?: boolean;
+		blockAds?: boolean;
+		blockTrackers?: boolean;
+		useCache?: boolean;
+	} = {},
 	fetchImpl: typeof fetch = fetch
 ): Promise<SearchResponse> {
 	const normalizedQuery = normalizeSearchQuery(query);
 	if (!normalizedQuery) throw new Error(SEARCH_QUERY_ERROR);
 
+	const tab = options.tab ?? 'web';
+	const safesearch = options.safesearch ? 'strict' : 'moderate';
+	const offset = Math.max(0, options.offset ?? 0);
+	const { freshness, country, filterAds = false, blockAds = false, blockTrackers = false } = options;
+
+	if (options.useCache) {
+		const key = makeCacheKey(
+			normalizedQuery, tab, safesearch, offset,
+			freshness, country, filterAds, blockAds, blockTrackers
+		);
+		const now = Date.now();
+
+		// Return cached entry if still fresh
+		const cached = searchCache.get(key);
+		if (cached && cached.expiresAt > now) return cached.response;
+
+		// Evict all stale entries
+		for (const [k, v] of searchCache) {
+			if (v.expiresAt <= now) searchCache.delete(k);
+		}
+
+		const result = await fetchBraveSearch(
+			normalizedQuery, tab, safesearch, offset, freshness,
+			fetchImpl, country, filterAds, blockAds, blockTrackers
+		);
+		searchCache.set(key, { response: result, expiresAt: now + CACHE_TTL_MS });
+		return result;
+	}
+
 	return await fetchBraveSearch(
-		normalizedQuery,
-		options.tab ?? 'web',
-		options.safesearch ? 'strict' : 'moderate',
-		Math.max(0, options.offset ?? 0),
-		options.freshness,
-		fetchImpl,
-		options.country,
-		options.filterAds,
-		options.blockAds,
-		options.blockTrackers
+		normalizedQuery, tab, safesearch, offset, freshness,
+		fetchImpl, country, filterAds, blockAds, blockTrackers
 	);
 }

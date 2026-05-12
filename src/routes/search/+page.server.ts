@@ -1,3 +1,4 @@
+import { redirect } from '@sveltejs/kit';
 import {
 	normalizeSearchQuery,
 	SEARCH_QUERY_ERROR,
@@ -5,6 +6,7 @@ import {
 	VALID_FRESHNESS,
 	type SearchTab
 } from '$lib/search';
+import { resolveBang } from '$lib/bangs';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, url }) => {
@@ -19,13 +21,22 @@ export const load = (async ({ fetch, url }) => {
 			newsResults: undefined,
 			videoResults: undefined,
 			imageResults: undefined,
-			infobox: undefined
+			infobox: undefined,
+			didYouMean: undefined
 		};
 	}
 
 	const rawQuery = url.searchParams.get('q') ?? '';
+
+	// Bang redirect — must happen before normalisation so short/special queries work
+	if (rawQuery.trim()) {
+		const bang = resolveBang(rawQuery.trim());
+		if (bang) redirect(302, bang.redirectUrl);
+	}
+
 	const query = normalizeSearchQuery(rawQuery);
 	const safe = url.searchParams.get('safe') === '1';
+	const enableCache = url.searchParams.get('enablecache') === '1';
 	const rawTab = url.searchParams.get('t') ?? 'web';
 	const tab: SearchTab = VALID_TABS.has(rawTab as SearchTab) ? (rawTab as SearchTab) : 'web';
 	const rawFreshness = url.searchParams.get('f') ?? '';
@@ -41,7 +52,8 @@ export const load = (async ({ fetch, url }) => {
 			newsResults: undefined,
 			videoResults: undefined,
 			imageResults: undefined,
-			infobox: undefined
+			infobox: undefined,
+			didYouMean: undefined
 		};
 	}
 
@@ -55,7 +67,8 @@ export const load = (async ({ fetch, url }) => {
 			newsResults: undefined,
 			videoResults: undefined,
 			imageResults: undefined,
-			infobox: undefined
+			infobox: undefined,
+			didYouMean: undefined
 		};
 	}
 
@@ -71,6 +84,7 @@ export const load = (async ({ fetch, url }) => {
 	if (filterAds) apiParams.set('filterads', '1');
 	if (blockAds) apiParams.set('blockads', '1');
 	if (blockTrackers) apiParams.set('blocktrackers', '1');
+	if (enableCache) apiParams.set('enablecache', '1');
 
 	try {
 		const response = await fetch(`/api/search?${apiParams}`);
@@ -122,6 +136,7 @@ export const load = (async ({ fetch, url }) => {
 				attributes?: Array<[string, string]>;
 				profiles?: Array<{ network: string; url: string; imageUrl?: string }>;
 			};
+			didYouMean?: string;
 		} | null;
 
 		if (!response.ok) throw new Error(payload?.error ?? 'Search backend unavailable.');
@@ -135,7 +150,8 @@ export const load = (async ({ fetch, url }) => {
 			newsResults: payload?.newsResults,
 			videoResults: payload?.videoResults,
 			imageResults: payload?.imageResults,
-			infobox: payload?.infobox
+			infobox: payload?.infobox,
+			didYouMean: payload?.didYouMean
 		};
 	} catch {
 		return {
@@ -147,7 +163,8 @@ export const load = (async ({ fetch, url }) => {
 			newsResults: undefined,
 			videoResults: undefined,
 			imageResults: undefined,
-			infobox: undefined
+			infobox: undefined,
+			didYouMean: undefined
 		};
 	}
 }) satisfies PageServerLoad;

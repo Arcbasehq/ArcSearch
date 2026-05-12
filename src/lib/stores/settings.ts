@@ -50,6 +50,14 @@ const defaultSettings: Setting[] = [
 		checked: true
 	},
 	{
+		id: 'enable-cache',
+		name: 'Cache search results',
+		description: 'Speed up repeated searches by reusing results for up to 5 minutes.',
+		category: 'general',
+		type: 'toggle',
+		checked: false
+	},
+	{
 		id: 'default-tab',
 		name: 'Default search type',
 		description: 'Which tab opens when you start a new search.',
@@ -274,6 +282,19 @@ function createSettingsStore() {
 			set(defaultSettings);
 			if (typeof window !== 'undefined') {
 				window.localStorage.removeItem('arcsearch:settings');
+			}
+		},
+		import: (raw: unknown): boolean => {
+			if (!Array.isArray(raw)) return false;
+			try {
+				const merged = mergeWithDefaults(raw as unknown[]);
+				set(merged);
+				if (typeof window !== 'undefined') {
+					window.localStorage.setItem('arcsearch:settings', JSON.stringify(merged));
+				}
+				return true;
+			} catch {
+				return false;
 			}
 		}
 	};

@@ -166,6 +166,16 @@
 			</p>
 		{/if}
 
+		{#if data.didYouMean}
+			<p class="mb-4 max-w-2xl text-sm text-[var(--app-muted)]">
+				Did you mean:
+				<a
+					href="/search?q={encodeURIComponent(data.didYouMean)}"
+					class="font-medium italic text-[var(--app-accent)] hover:underline"
+				>{data.didYouMean}</a>?
+			</p>
+		{/if}
+
 		<!-- Two-column grid: left = results, right = infobox (web tab only) -->
 		<div class={data.infobox && data.tab === 'web' ? 'flex gap-8' : ''}>
 			<!-- Left / main column -->

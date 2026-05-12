@@ -332,7 +332,7 @@
 				<span class="text-[var(--app-muted)]">·</span>
 				<span
 					class="rounded-full border border-[var(--app-border)] bg-[var(--app-surface)] px-2 py-0.5 text-xs text-[var(--app-muted)]"
-					>v0.0.1</span
+					>v0.2.0</span
 				>
 			</div>
 			<div
